@@ -38,10 +38,10 @@ public class ClienteController {
         return ResponseEntity.ok(clientes);
     }
 
-    @PutMapping("/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Cliente> buscarClientePorId(@PathVariable Long id) {
         return clienteService.buscarClientePorId(id)
-                .map(ResponseEntity::ok)
+                .map(cliente -> ResponseEntity.ok(cliente))
                 .orElse(ResponseEntity.notFound().build());
     }
 

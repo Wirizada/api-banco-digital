@@ -3,6 +3,8 @@ package br.com.bancodigital.api.service;
 import br.com.bancodigital.api.model.entity.Cliente;
 import br.com.bancodigital.api.repository.ClienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -13,6 +15,9 @@ import java.util.Optional;
 
 @Service
 public class ClienteService {
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private ClienteRepository clienteRepository;
@@ -26,6 +31,9 @@ public class ClienteService {
         if(Period.between(cliente.getDataNascimento(), LocalDate.now()).getYears() < 18) {
             throw new IllegalArgumentException("Cliente deve ser maior de 18 anos.");
         }
+
+        String senhaCodificada = passwordEncoder.encode(cliente.getSenha());
+        cliente.setSenha(senhaCodificada);
 
         return clienteRepository.save(cliente);
     }
