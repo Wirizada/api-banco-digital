@@ -5,7 +5,6 @@ import br.com.bancodigital.api.model.dto.TransacaoDTO;
 import br.com.bancodigital.api.model.dto.TransferenciaDTO;
 import br.com.bancodigital.api.model.entity.Conta;
 import br.com.bancodigital.api.service.ContaService;
-import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -86,4 +85,27 @@ public class ContaController {
         }
     }
 
+    @PutMapping("/{id}/manuntencao")
+    public ResponseEntity<?> aplicarTaxaManuntencao(@PathVariable Long id) {
+        try {
+            Conta contaAtualizada = contaService.aplicarTaxaManuntencao(id);
+            return ResponseEntity.ok(contaAtualizada);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/{id}/rendimentos")
+    public ResponseEntity<?> aplicarRendimentos(@PathVariable Long id) {
+        try {
+            Conta contaAtualizada = contaService.aplicarRendimentos(id);
+            return ResponseEntity.ok(contaAtualizada);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

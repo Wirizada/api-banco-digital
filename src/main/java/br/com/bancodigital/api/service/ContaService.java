@@ -1,5 +1,6 @@
 package br.com.bancodigital.api.service;
 
+import br.com.bancodigital.api.enums.TipoConta;
 import br.com.bancodigital.api.model.dto.ContaRequestDTO;
 import br.com.bancodigital.api.model.entity.Cliente;
 import br.com.bancodigital.api.model.entity.Conta;
@@ -70,6 +71,7 @@ public class ContaService {
 
     @Transactional
     public Conta realizarSaque(Long contaId, BigDecimal valor) {
+
         if (valor == null || valor.compareTo(BigDecimal.ZERO)<= 0) {
             throw new IllegalArgumentException("Valor de saque deve ser positivo.");
         }
@@ -88,9 +90,9 @@ public class ContaService {
     }
 
     @Transactional
-    public void realizarTransferencia(Long idContaOrigem, Long idContaDestino, BigDecimal valor){
+    public void realizarTransferencia(Long idContaOrigem, Long idContaDestino, BigDecimal valor) {
 
-        if(idContaOrigem.equals(idContaDestino)){
+        if (idContaOrigem.equals(idContaDestino)) {
             throw new IllegalArgumentException("A conta de origem e destino não podem ser a mesma.");
         }
 
@@ -113,5 +115,78 @@ public class ContaService {
 
         contaRepository.save(contaOrigem);
         contaRepository.save(contaDestino);
+    }
+
+    @Transactional
+    public Conta aplicarTaxaManuntencao(Long contaId){
+
+        Conta conta = contaRepository.findById(contaId)
+                .orElseThrow(() -> new RuntimeException("Conta não encontrada."));
+
+        if (conta.getTipoConta() != TipoConta.CORRENTE) {
+            throw new IllegalArgumentException("A taxa de manuntenção apenas aplica-se em contas correntes.");
+        }
+
+        BigDecimal taxaManuntencao;
+        switch (conta.getCliente().getCategoria()) {
+            case COMUM:;
+                taxaManuntencao = new BigDecimal("12.00");
+                break;
+            case SUPER:                ;
+                taxaManuntencao = new BigDecimal("8.00");
+                break;
+            case PREMIUM:                ;
+                taxaManuntencao = BigDecimal.ZERO;
+                break;
+            default:
+                throw new IllegalArgumentException("Categoria de cliente inválida.");
+        }
+
+        if (taxaManuntencao.compareTo(BigDecimal.ZERO) == 0) {
+            return conta;
+        }
+
+        conta.setSaldo(conta.getSaldo().subtract(taxaManuntencao));
+        return contaRepository.save(conta);
+    }
+
+    @Transactional
+    public Conta aplicarRendimentos(Long contaId) {
+
+        Conta conta = contaRepository.findById(contaId)
+                .orElseThrow(() -> new RuntimeException("Conta não encontrada."));
+
+        if (conta.getTipoConta() != TipoConta.POUPANCA) {
+            throw new IllegalArgumentException("Rendimentos só aplicam-se em contas poupança.");
+        }
+
+        BigDecimal taxaAnual;
+        switch (conta.getCliente().getCategoria()){
+            case COMUM:
+                taxaAnual = new BigDecimal("0.005");
+                break;
+            case SUPER:
+                taxaAnual = new BigDecimal("0.007");
+                break;
+            case PREMIUM:
+                taxaAnual = new BigDecimal("0.009");
+                break;
+            default:
+                taxaAnual = BigDecimal.ZERO;
+                break;
+        }
+
+        if(taxaAnual.compareTo(BigDecimal.ZERO) == 0) {
+            return conta;
+        }
+
+        double taxaAnualDouble = taxaAnual.doubleValue();
+        double taxaMensalDouble = Math.pow(1 + taxaAnualDouble, 1.0 / 12.0) - 1;
+        BigDecimal taxaMensal = BigDecimal.valueOf(taxaMensalDouble);
+
+        BigDecimal rendimento = conta.getSaldo().multiply(taxaMensal);
+        conta.setSaldo(conta.getSaldo().add(rendimento));
+
+        return contaRepository.save(conta);
     }
 }

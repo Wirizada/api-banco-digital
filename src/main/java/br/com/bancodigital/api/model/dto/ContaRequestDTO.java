@@ -22,5 +22,4 @@ public class ContaRequestDTO {
     public void setTipoConta(TipoConta tipoConta) {
         this.tipoConta = tipoConta;
     }
-
 }
