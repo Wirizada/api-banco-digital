@@ -11,13 +11,13 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/clientes")
+@RequestMapping("/cliente")
 public class ClienteController {
 
     @Autowired
     private ClienteService clienteService;
 
-    @PostMapping
+    @PostMapping("/add")
     public ResponseEntity<Cliente> criarCliente(@RequestBody Cliente cliente){
         try{
             Cliente novoCliente = clienteService.salvarCliente(cliente);
@@ -32,7 +32,7 @@ public class ClienteController {
         }
     }
 
-    @GetMapping
+    @GetMapping("/listAll")
     public ResponseEntity<List<Cliente>> listarClientes() {
         List<Cliente> clientes = clienteService.listarClientes();
         return ResponseEntity.ok(clientes);
