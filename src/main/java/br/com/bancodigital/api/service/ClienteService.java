@@ -1,9 +1,7 @@
 package br.com.bancodigital.api.service;
 
 import br.com.bancodigital.api.model.entity.Cliente;
-import br.com.bancodigital.api.model.entity.Conta;
 import br.com.bancodigital.api.repository.ClienteRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
